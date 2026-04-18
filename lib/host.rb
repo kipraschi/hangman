@@ -4,6 +4,15 @@ class Host
     @placeholder = create_placeholder
   end
 
+  def update_placeholder(letter)
+    letter_indexes = find_all_indexes(letter)
+    unless letter_indexes.empty?
+      letter_indexes.each do |index| 
+        @placeholder[index] = @secret[index]
+      end
+    end
+  end
+
   private
 
   def random_word 
@@ -20,6 +29,17 @@ class Host
 
   def create_placeholder
     Array.new(@secret.length, "_").join
+  end
+
+  def find_all_indexes(guess)
+    @secret
+      .each_with_index
+      .select do |letter, index|
+        if letter == guess
+          index
+        end
+      end
+      .map { |letter, index| index }
   end
 
 end
