@@ -5,6 +5,45 @@ class Host
     @incorrect_guesses_remaining = 6
   end
 
+  def give_feedback(guess)
+    if single_letter?(guess)
+      if @secret.include?(guess) 
+        update_placeholder(guess)
+        :correct_letter 
+      else
+        @incorrect_guesses_remaining -= 1
+        :wrong_letter
+      end
+    elsif full_word?(guess)
+      if guess == @secret.join 
+        :correct_word
+      else 
+        @incorrect_guesses_remaining -= 1
+        :wrong_word
+      end
+    else
+      :invalid_input
+    end
+  end
+  
+  private
+  
+  def random_word 
+    File.readlines('lib/dictionary.txt')
+    .select { |word| within_limits?(word.strip, 5, 12) }
+    .sample
+    .strip
+    .chars
+  end
+  
+  def within_limits?(word, lower, upper)
+    word.length >= lower && word.length <= upper
+  end
+  
+  def create_placeholder
+    Array.new(@secret.length, "_").join
+  end
+
   def update_placeholder(letter)
     letter_indexes = find_matching_indexes(letter)
     unless letter_indexes.empty?
@@ -13,25 +52,7 @@ class Host
       end
     end
   end
-
-  private
-
-  def random_word 
-    File.readlines('lib/dictionary.txt')
-      .select { |word| within_limits?(word.strip, 5, 12) }
-      .sample
-      .strip
-      .chars
-  end
-
-  def within_limits?(word, lower, upper)
-    word.length >= lower && word.length <= upper
-  end
-
-  def create_placeholder
-    Array.new(@secret.length, "_").join
-  end
-
+  
   def find_matching_indexes(guess)
     @secret
       .each_with_index
@@ -43,4 +64,11 @@ class Host
       .map { |letter, index| index }
   end
 
+  def single_letter?(guess)
+    guess.length == 1 && guess.match?(/[a-zA-Z]/)
+  end
+
+  def full_word?(guess)
+    guess.count("^a-zA-Z").zero? && guess.size >= 2
+  end
 end
