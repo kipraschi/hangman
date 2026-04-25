@@ -2,10 +2,11 @@ class Host
   def initialize
     @secret = random_word
     @placeholder = create_placeholder
+    @incorrect_guesses_remaining = 6
   end
 
   def update_placeholder(letter)
-    letter_indexes = find_all_indexes(letter)
+    letter_indexes = find_matching_indexes(letter)
     unless letter_indexes.empty?
       letter_indexes.each do |index| 
         @placeholder[index] = @secret[index]
@@ -31,7 +32,7 @@ class Host
     Array.new(@secret.length, "_").join
   end
 
-  def find_all_indexes(guess)
+  def find_matching_indexes(guess)
     @secret
       .each_with_index
       .select do |letter, index|
