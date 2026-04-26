@@ -1,6 +1,6 @@
 class Host
-  def initialize
-    @secret = random_word
+  def initialize(secret = random_word)
+    @secret = secret.downcase.strip.chars
     @placeholder = create_placeholder
   end
 
