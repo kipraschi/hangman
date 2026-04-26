@@ -2,28 +2,47 @@ class Host
   def initialize
     @secret = random_word
     @placeholder = create_placeholder
-      end
+  end
 
-attr_reader :placeholder
+  attr_reader :placeholder
 
   def evaluate_guess(guess)
     if single_letter?(guess)
       if @secret.include?(guess) 
-                :correct_letter 
+        :correct_letter 
       else
-                :wrong_letter
+        :wrong_letter
       end
     elsif full_word?(guess)
       if guess == @secret.join 
         :correct_word
       else 
-                :wrong_word
+        :wrong_word
       end
     else
       :invalid_input
     end
   end
   
+  def update_placeholder(guess)
+    if single_letter?(guess)
+      letter_indexes = find_matching_indexes(guess)
+      unless letter_indexes.empty?
+        letter_indexes.each do |index| 
+          @placeholder[index] = @secret[index]
+        end
+      end
+    elsif full_word?(guess)
+      if guess == @secret.join
+        @placeholder = @secret.join
+      end
+    end
+  end
+
+  def secret_revealed?
+    @placeholder == @secret.join
+  end
+
   private
   
   def random_word 
@@ -40,15 +59,6 @@ attr_reader :placeholder
   
   def create_placeholder
     Array.new(@secret.length, "_").join
-  end
-
-  def update_placeholder(letter)
-    letter_indexes = find_matching_indexes(letter)
-    unless letter_indexes.empty?
-      letter_indexes.each do |index| 
-        @placeholder[index] = @secret[index]
-      end
-    end
   end
   
   def find_matching_indexes(guess)
