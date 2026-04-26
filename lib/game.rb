@@ -2,10 +2,11 @@ require_relative 'host'
 require_relative 'player'
 
 class Game
-  def initialize
+  def initialize(max_incorrect_guesses = 6)
     @host = Host.new
     @player = Player.new
-    @incorrect_guesses_remaining = 6
+    @max_incorrect_guesses = max_incorrect_guesses
+    @incorrect_guesses = []
   end
 
   def play
@@ -26,7 +27,9 @@ class Game
     when :correct_letter,:correct_word
       @host.update_placeholder(guess)
     when :wrong_letter, :wrong_word
-      @incorrect_guesses_remaining -= 1
+      unless @incorrect_guesses.include?(guess)
+        @incorrect_guesses.push(guess) 
+      end
     end
   end
 
@@ -35,7 +38,7 @@ class Game
   end
   
   def game_lost
-    @incorrect_guesses_remaining == 0
+    incorrect_guesses_remaining == 0
   end
 
   def print_greeting
@@ -49,7 +52,8 @@ class Game
       puts "It's there: #{@host.placeholder}"
     when :wrong_letter, :wrong_word
       print "Nope, that's not it! "
-      puts "Incorrect guesses remaining: #{@incorrect_guesses_remaining}"
+      puts "You've already tried: #{@incorrect_guesses}"
+      puts "Incorrect guesses remaining: #{incorrect_guesses_remaining}"
     when :correct_word
       puts "That's right!"
     when :invalid_input
@@ -59,10 +63,14 @@ class Game
 
   def print_outcome
     if game_won
-      puts "Congratulations, you won! It was \"#{@host.placeholder}\""
+      puts "\nCongratulations, you won! It was \"#{@host.placeholder}\""
     elsif game_lost 
-      puts "You're out of wrong guesses... Game over."
+      puts "\nYou're out of wrong guesses... Game over."
     end
+  end
+
+  def incorrect_guesses_remaining
+    @max_incorrect_guesses - @incorrect_guesses.count
   end
 
 end
