@@ -2,24 +2,22 @@ class Host
   def initialize
     @secret = random_word
     @placeholder = create_placeholder
-    @incorrect_guesses_remaining = 6
-  end
+      end
 
-  def give_feedback(guess)
+attr_reader :placeholder
+
+  def evaluate_guess(guess)
     if single_letter?(guess)
       if @secret.include?(guess) 
-        update_placeholder(guess)
-        :correct_letter 
+                :correct_letter 
       else
-        @incorrect_guesses_remaining -= 1
-        :wrong_letter
+                :wrong_letter
       end
     elsif full_word?(guess)
       if guess == @secret.join 
         :correct_word
       else 
-        @incorrect_guesses_remaining -= 1
-        :wrong_word
+                :wrong_word
       end
     else
       :invalid_input
