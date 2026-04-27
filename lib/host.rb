@@ -4,7 +4,7 @@ class Host
     @placeholder = create_placeholder
   end
 
-  attr_reader :placeholder
+  attr_reader :placeholder, :secret
 
   def evaluate_guess(guess)
     if single_letter?(guess)
@@ -42,15 +42,13 @@ class Host
   def secret_revealed?
     @placeholder == @secret.join
   end
-
+  
   private
   
   def random_word 
     File.readlines('lib/dictionary.txt')
     .select { |word| within_limits?(word.strip, 5, 12) }
     .sample
-    .strip
-    .chars
   end
   
   def within_limits?(word, lower, upper)

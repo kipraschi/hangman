@@ -1,5 +1,6 @@
 require_relative 'host'
 require_relative 'player'
+require 'json'
 
 class Game
   def initialize(max_incorrect_guesses = 6)
@@ -12,15 +13,23 @@ class Game
   def play
     print_greeting
     until game_won || game_lost
-      guess = @player.take_guess
-      evaluation = @host.evaluate_guess(guess)
-      apply_result(evaluation, guess)
+      input = @player.take_guess
+      if player_saved(input)
+        save
+        next
+      end
+      evaluation = @host.evaluate_guess(input)
+      apply_result(evaluation, input)
       print_result(evaluation)
     end
     print_outcome
   end
-
+  
   private
+  
+  def player_saved(input)
+    input == "_s"
+  end
 
   def apply_result(evaluation, guess)
     case evaluation
@@ -43,6 +52,8 @@ class Game
 
   def print_greeting
     puts "Welcome to the game of hangman!"
+    puts " - You can save your progress anytime by typing '_s'."
+    puts " - You can load your past saves by typing '_l'."
     puts "Guess the word: #{@host.placeholder}"
   end
 
@@ -71,6 +82,20 @@ class Game
 
   def incorrect_guesses_remaining
     @max_incorrect_guesses - @incorrect_guesses.count
+  end
+
+  def save
+    File.write("game_save.json", JSON.generate(game_state))
+    puts "Game Saved!"
+  end
+
+  def game_state
+    {
+      max_incorrect_guesses: @max_incorrect_guesses,
+      incorrect_guesses: @incorrect_guesses,
+      placeholder: @host.placeholder,
+      secret: @host.secret.join
+    }
   end
 
 end
