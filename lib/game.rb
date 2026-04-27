@@ -13,11 +13,8 @@ class Game
   def play
     print_greeting
     until game_won || game_lost
-      input = @player.take_guess
-      if player_saved(input)
-        save
-        next
-      end
+      input = @player.take_action
+      next if special_command?(input)
       evaluation = @host.evaluate_guess(input)
       apply_result(evaluation, input)
       print_result(evaluation)
@@ -27,8 +24,17 @@ class Game
   
   private
   
-  def player_saved(input)
-    input == "_s"
+  def special_command?(input)
+    case input.downcase
+    when '_s'
+      save
+      true
+    when '_l'
+      load
+      true
+    else 
+      false
+    end
   end
 
   def apply_result(evaluation, guess)
@@ -63,13 +69,18 @@ class Game
       puts "It's there: #{@host.placeholder}"
     when :wrong_letter, :wrong_word
       print "Nope, that's not it! "
-      puts "You've already tried: #{@incorrect_guesses}"
-      puts "Incorrect guesses remaining: #{incorrect_guesses_remaining}"
+      print_progress
     when :correct_word
       puts "That's right!"
     when :invalid_input
       puts "That's neither a word nor a letter, try again."
     end
+  end
+
+  def print_progress
+    puts "You've already tried: #{@incorrect_guesses}"
+    puts "Incorrect guesses remaining: #{incorrect_guesses_remaining}"
+    puts "Progress: #{@host.placeholder}"
   end
 
   def print_outcome
@@ -85,8 +96,22 @@ class Game
   end
 
   def save
-    File.write("game_save.json", JSON.generate(game_state))
-    puts "Game Saved!"
+    Dir.mkdir("saves") unless Dir.exist?("saves")
+    File.write("saves/game_save.json", JSON.generate(game_state))
+    puts "Game saved!"
+  end
+
+  def load
+    if File.exist?("saves/game_save.json")
+      data = JSON.parse(File.read("saves/game_save.json"))
+      @max_incorrect_guesses = data['max_incorrect_guesses']
+      @incorrect_guesses = data['incorrect_guesses']
+      @host = Host.new(data['secret'], data['placeholder'])
+      puts "Game loaded!"
+      print_progress
+    else
+      puts "Could not load. No game saves found!"
+    end
   end
 
   def game_state
@@ -97,5 +122,5 @@ class Game
       secret: @host.secret.join
     }
   end
-
+  
 end

@@ -1,7 +1,7 @@
 class Host
-  def initialize(secret = random_word)
+  def initialize(secret = random_word, placeholder = nil)
     @secret = secret.downcase.strip.chars
-    @placeholder = create_placeholder
+    @placeholder = placeholder.nil? ? create_placeholder : placeholder
   end
 
   attr_reader :placeholder, :secret
